@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>polychotam — market intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #060a0f;
+    --surface: #0d1420;
+    --border: #1a2535;
+    --green: #00ff87;
+    --red: #ff3c5a;
+    --blue: #4af;
+    --text: #e8edf5;
+    --muted: #4a5a70;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,135,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,135,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: -200px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(0,255,135,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    from { transform: translate(0,0); }
+    to { transform: translate(300px, 200px); }
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 0 0;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--muted); }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .hero { padding: 100px 0 80px; }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .tag::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: clamp(42px, 7vw, 80px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--green);
+  }
+
+  .sub {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 48px;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green);
+    color: #000;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 14px 28px;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,255,135,0.3);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    padding: 14px 28px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--green);
+    color: var(--text);
+  }
+
+  .ticker-wrap {
+    margin: 64px 0;
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0;
+  }
+
+  .ticker {
+    display: flex;
+    gap: 0;
+    animation: scroll 25s linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .tick-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 32px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .tick-item .val { color: var(--text); }
+  .tick-item .up { color: var(--green); }
+  .tick-item .dn { color: var(--red); }
+  .tick-sep { color: var(--border); }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 80px;
+  }
+
+  .feat {
+    background: var(--surface);
+    padding: 32px;
+    transition: background 0.2s;
+  }
+
+  .feat:hover { background: #111d2e; }
+
+  .feat-icon {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .feat-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .feat-desc {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 80px;
+  }
+
+  .stat {
+    background: var(--bg);
+    padding: 28px 32px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .notify {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 48px;
+    margin-bottom: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .notify::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+
+  .notify h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .notify p {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+  }
+
+  .input-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-right: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 14px 18px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .input-row input:focus { border-color: var(--green); }
+  .input-row input::placeholder { color: var(--muted); }
+
+  .input-row button {
+    background: var(--green);
+    color: #000;
+    border: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0 24px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .input-row button:hover { opacity: 0.85; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer .logo { font-size: 12px; }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--green); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <div class="logo">poly<span>//</span>chotam</div>
+    <div class="badge">BETA · 2025</div>
+  </nav>
+
+  <section class="hero">
+    <div class="tag">Polymarket Intelligence</div>
+    <h1>Market signals.<br><em>No noise.</em></h1>
+    <p class="sub">Prediction market analytics. Track smart money on Polymarket — wallet performance, position clustering, and market momentum signals.</p>
+    <div class="cta-row">
+      <a href="#notify" class="btn-primary">→ Get early access</a>
+      <a href="#features" class="btn-ghost">↓ How it works</a>
+    </div>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <span class="tick-item">BTC/USD <span class="val">$98,220</span> <span class="up">+2.4%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">TRUMP WIN 2028 <span class="val">67¢</span> <span class="dn">−3%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">FED CUT JUN <span class="val">42¢</span> <span class="up">+8%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">ETH/BTC <span class="val">0.036</span> <span class="dn">−0.8%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">RECESSION 2025 <span class="val">31¢</span> <span class="up">+5%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">AI BEATS HUMAN CHESS <span class="val">89¢</span> <span class="up">+1%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">BTC/USD <span class="val">$98,220</span> <span class="up">+2.4%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">TRUMP WIN 2028 <span class="val">67¢</span> <span class="dn">−3%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">FED CUT JUN <span class="val">42¢</span> <span class="up">+8%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">ETH/BTC <span class="val">0.036</span> <span class="dn">−0.8%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">RECESSION 2025 <span class="val">31¢</span> <span class="up">+5%</span></span><span class="tick-sep">·</span>
+      <span class="tick-item">AI BEATS HUMAN CHESS <span class="val">89¢</span> <span class="up">+1%</span></span><span class="tick-sep">·</span>
+    </div>
+  </div>
+
+  <section id="features" class="features">
+    <div class="feat">
+      <div class="feat-icon">🔍</div>
+      <div class="feat-title">Wallet Analytics</div>
+      <div class="feat-desc">Track any Polymarket wallet. Win rate, ROI, position size history, active markets. Find who's actually making money.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Market Predictions</div>
+      <div class="feat-desc">Aggregated signals from smart money positions. See where big volume moves before prices reflect it.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Real-time Alerts</div>
+      <div class="feat-desc">Get notified when tracked wallets open new positions, or when market odds shift significantly.</div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val">18K+</div>
+      <div class="stat-label">Active Markets</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">$1.2B</div>
+      <div class="stat-label">Volume Tracked</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">340ms</div>
+      <div class="stat-label">Avg. Latency</div>
+    </div>
+  </div>
+
+  <div id="notify" class="notify">
+    <h2>Be first in line.</h2>
+    <p>Early access launching soon. Leave your email — no spam, just the launch ping.</p>
+    <div class="input-row">
+      <input type="email" placeholder="your@email.com">
+      <button>NOTIFY ME</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="logo">poly<span>//</span>chotam</div>
+    <div class="footer-links">
+      <a href="#">Twitter</a>
+      <a href="#">Telegram</a>
+      <a href="#">GitHub</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
